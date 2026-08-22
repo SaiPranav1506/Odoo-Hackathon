@@ -81,29 +81,18 @@ export async function updateStructure(args: { hrUserId: number; employeeUserId: 
   const profile = await profileByUserId(args.employeeUserId);
 
   const existing = profile.salaryStructure;
-  const data: Prisma.SalaryStructureUncheckedUpdateInput = {
-    basicPay: new Prisma.Decimal(args.input.basicPay),
-    housingAllowance: args.input.housingAllowance !== undefined ? new Prisma.Decimal(args.input.housingAllowance) : existing?.housingAllowance,
-    transportAllowance: args.input.transportAllowance !== undefined ? new Prisma.Decimal(args.input.transportAllowance) : existing?.transportAllowance,
-    taxPercent: args.input.taxPercent !== undefined ? new Prisma.Decimal(args.input.taxPercent) : existing?.taxPercent,
-    effectiveFrom: args.input.effectiveFrom ? new Date(args.input.effectiveFrom) : existing?.effectiveFrom,
-    otherAllowances: args.input.otherAllowances ?? (existing?.otherAllowances as object),
-    otherDeductions: args.input.otherDeductions ?? (existing?.otherDeductions as object),
-  };
+  const basicPay = new Prisma.Decimal(args.input.basicPay);
+  const housing = args.input.housingAllowance !== undefined ? new Prisma.Decimal(args.input.housingAllowance) : (existing?.housingAllowance ?? null);
+  const transport = args.input.transportAllowance !== undefined ? new Prisma.Decimal(args.input.transportAllowance) : (existing?.transportAllowance ?? null);
+  const tax = args.input.taxPercent !== undefined ? new Prisma.Decimal(args.input.taxPercent) : (existing?.taxPercent ?? null);
+  const otherAllowances = args.input.otherAllowances ? (args.input.otherAllowances as object) : (existing?.otherAllowances as object) ?? undefined;
+  const otherDeductions = args.input.otherDeductions ? (args.input.otherDeductions as object) : (existing?.otherDeductions as object) ?? undefined;
+  const effectiveFrom = args.input.effectiveFrom ? new Date(args.input.effectiveFrom) : existing?.effectiveFrom ?? null;
 
   const updated = await prisma.salaryStructure.upsert({
     where: { employeeId: profile.id },
-    create: {
-      employeeId: profile.id,
-      basicPay: data.basicPay as Prisma.Decimal,
-      housingAllowance: data.housingAllowance as Prisma.Decimal | undefined,
-      transportAllowance: data.transportAllowance as Prisma.Decimal | undefined,
-      taxPercent: data.taxPercent as Prisma.Decimal | undefined,
-      otherAllowances: data.otherAllowances,
-      otherDeductions: data.otherDeductions,
-      effectiveFrom: data.effectiveFrom,
-    },
-    update: data,
+    create: { employeeId: profile.id, basicPay, housingAllowance: housing, transportAllowance: transport, taxPercent: tax, otherAllowances, otherDeductions, effectiveFrom },
+    update: { basicPay, housingAllowance: housing, transportAllowance: transport, taxPercent: tax, otherAllowances, otherDeductions, effectiveFrom },
   });
 
   // Audit + notify + email that salary changed.

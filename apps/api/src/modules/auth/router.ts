@@ -1,11 +1,11 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../../middleware/validate';
 import { authLimiter } from '../../middleware/rateLimit';
 import { requireAuth } from '../../middleware/auth';
 import * as service from './service';
 import { getAuth } from '../../lib/authContext';
-import { httpError } from '../../utils/apiError';
 
 const signupSchema = z.object({
   employeeId: z.string().min(1).max(30),
@@ -27,11 +27,11 @@ const loginSchema = z.object({
 const refreshSchema = z.object({ refreshToken: z.string().min(1) });
 const verifySchema = z.object({ token: z.string().min(1) });
 
-export type SignupBody = z.infer<typeof signupSchema>;
+export const authRouter = Router();
 
 async function signup(req: Request, res: Response, next: NextFunction) {
   try {
-    const result = await service.signup(req.body as SignupBody);
+    const result = await service.signup(req.body);
     res.status(201).json(result);
   } catch (e) {
     next(e);
@@ -91,12 +91,10 @@ async function me(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export const registerAuthRoutes = (router: { post: (p: string, ...h: unknown[]) => unknown }): void => {
-  router.post('/auth/signup', authLimiter, validate({ body: signupSchema }), signup as never);
-  router.post('/auth/login', authLimiter, validate({ body: loginSchema }), login as never);
-  router.post('/auth/refresh', validate({ body: refreshSchema }), refresh as never);
-  router.get('/auth/verify-email', validate({ query: verifySchema }), verifyEmail as never);
-  router.post('/auth/resend-verification', requireAuth, resend as never);
-  router.post('/auth/logout', requireAuth, logout as never);
-  router.get('/auth/me', requireAuth, me as never);
-};
+authRouter.post('/auth/signup', authLimiter, validate({ body: signupSchema }), signup);
+authRouter.post('/auth/login', authLimiter, validate({ body: loginSchema }), login);
+authRouter.post('/auth/refresh', validate({ body: refreshSchema }), refresh);
+authRouter.get('/auth/verify-email', validate({ query: verifySchema }), verifyEmail);
+authRouter.post('/auth/resend-verification', requireAuth, resend);
+authRouter.post('/auth/logout', requireAuth, logout);
+authRouter.get('/auth/me', requireAuth, me);

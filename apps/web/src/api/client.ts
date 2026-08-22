@@ -24,18 +24,24 @@ async function doRefresh(): Promise<string | null> {
   }
 }
 
+interface RetriableConfig {
+  _retry?: boolean;
+  [key: string]: unknown;
+}
+
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
-    const original = error.config as (Record<string, unknown> & { _retry?: boolean });
+    const original = error.config as RetriableConfig | undefined;
     if (error.response?.status === 401 && original && !original._retry) {
       original._retry = true;
       refreshing = refreshing ?? doRefresh();
       const token = await refreshing;
       refreshing = null;
       if (token) {
-        original.headers = { ...(original.headers as Record<string, string>), Authorization: `Bearer ${token}` };
-        return api(original!);
+        const cfg = original as unknown as import('axios').InternalAxiosRequestConfig;
+        (cfg.headers as Record<string, unknown>)['Authorization'] = `Bearer ${token}`;
+        return api.request(cfg);
       }
       window.dispatchEvent(new Event('auth:logout'));
     }
@@ -45,6 +51,6 @@ api.interceptors.response.use(
 
 // Extract human-friendly error message from an axios error.
 export function errorMessage(err: unknown): string {
-  const e = err as { response?: { data?: { error?: { message?: string } } }; message?: string };
+  const e = err as { response?: { data?: { error?: { message?: string; details?: Array<{ message?: string }> } } }; message?: string };
   return e?.response?.data?.error?.message ?? e?.response?.data?.error?.details?.[0]?.message ?? e?.message ?? 'Something went wrong';
 }

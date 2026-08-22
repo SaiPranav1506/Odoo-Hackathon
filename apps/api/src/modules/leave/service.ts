@@ -184,19 +184,27 @@ export async function decide(args: { hrUserId: number; requestId: number; status
       }
 
       // Update balance.
-      const bal = request.employee.leaveBalance;
       const inc = request.days;
-      const data =
-        request.leaveType === 'PAID'
-          ? { paidDaysUsed: { increment: inc } }
-          : request.leaveType === 'SICK'
-            ? { sickDaysUsed: { increment: inc } }
-            : { unpaidDaysUsed: { increment: inc } };
-      await tx.leaveBalance.upsert({
-        where: { employeeId },
-        create: { employeeId, ...(data as never) },
-        update: data,
-      });
+      const balanceWhere = { employeeId };
+      if (request.leaveType === 'PAID') {
+        await tx.leaveBalance.upsert({
+          where: balanceWhere,
+          create: { employeeId, paidDaysUsed: inc },
+          update: { paidDaysUsed: { increment: inc } },
+        });
+      } else if (request.leaveType === 'SICK') {
+        await tx.leaveBalance.upsert({
+          where: balanceWhere,
+          create: { employeeId, sickDaysUsed: inc },
+          update: { sickDaysUsed: { increment: inc } },
+        });
+      } else {
+        await tx.leaveBalance.upsert({
+          where: balanceWhere,
+          create: { employeeId, unpaidDaysUsed: inc },
+          update: { unpaidDaysUsed: { increment: inc } },
+        });
+      }
     }
 
     await tx.leaveRequest.update({
