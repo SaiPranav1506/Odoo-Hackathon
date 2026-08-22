@@ -45,9 +45,12 @@ export function Login() {
             className="w-full rounded-lg bg-indigo-600 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50">
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
-          <p className="mt-4 text-center text-sm text-slate-500">
-            No account? <Link to="/signup" className="font-medium text-indigo-600 hover:underline">Create one</Link>
-          </p>
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <p className="text-slate-500">
+              No account? <Link to="/signup" className="font-medium text-indigo-600 hover:underline">Create one</Link>
+            </p>
+            <Link to="/forgot-password" className="font-medium text-slate-500 hover:text-indigo-600 hover:underline">Forgot password?</Link>
+          </div>
         </form>
       </div>
     </div>

@@ -57,6 +57,8 @@ model User {
   emailVerifiedAt      DateTime?
   verificationToken    String?   @unique
   verificationTokenExpiry DateTime?
+  resetToken           String?   @unique
+  resetTokenExpiry     DateTime?
   refreshTokenHash     String?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt

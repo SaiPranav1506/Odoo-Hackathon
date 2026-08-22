@@ -6,6 +6,9 @@ import { Layout } from './components/Layout';
 import { Login } from './features/auth/Login';
 import { SignUp } from './features/auth/SignUp';
 import { VerifyEmail, VerifyEmailNotice } from './features/auth/VerifyEmail';
+import { ForgotPassword } from './features/auth/ForgotPassword';
+import { ResetPassword } from './features/auth/ResetPassword';
+import { Account } from './features/account/Account';
 import { EmployeeDashboard } from './features/dashboard/EmployeeDashboard';
 import { AdminDashboard } from './features/dashboard/AdminDashboard';
 import { MyAttendance } from './features/attendance/MyAttendance';
@@ -33,20 +36,23 @@ export default function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/verify-email/notice" element={<VerifyEmailNotice />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route element={<RequireAuth />}>
               <Route element={<RequireVerified />}>
-                <Route element={<RequireRole role="EMPLOYEE" />}>
-                  <Route element={<Layout />}>
+                <Route element={<Layout />}>
+                  {/* Role-agnostic, verified-user routes (shared by all roles). */}
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  {/* Role-scoped routes. */}
+                  <Route element={<RequireRole role="EMPLOYEE" />}>
                     <Route path="/" element={<EmployeeDashboard />} />
                     <Route path="/attendance" element={<MyAttendance />} />
                     <Route path="/leave" element={<MyLeave />} />
                     <Route path="/payroll" element={<MyPayroll />} />
-                    <Route path="/notifications" element={<Notifications />} />
                   </Route>
-                </Route>
-                <Route element={<RequireRole role="HR" />}>
-                  <Route element={<Layout />}>
+                  <Route element={<RequireRole role="HR" />}>
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/admin/employees" element={<Employees />} />
                     <Route path="/admin/employees/:id" element={<EmployeeDetail />} />
@@ -54,7 +60,6 @@ export default function App() {
                     <Route path="/admin/leave" element={<AdminLeave />} />
                     <Route path="/admin/payroll" element={<AdminPayroll />} />
                     <Route path="/admin/reports" element={<Reports />} />
-                    <Route path="/notifications" element={<Notifications />} />
                   </Route>
                 </Route>
               </Route>

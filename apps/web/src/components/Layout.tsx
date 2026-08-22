@@ -23,6 +23,7 @@ const NAV: NavItem[] = [
   { to: '/admin/leave', label: 'Leave Approvals', icon: '🗂️', roles: ['HR'] },
   { to: '/admin/payroll', label: 'Payroll', icon: '💰', roles: ['HR'] },
   { to: '/admin/reports', label: 'Reports', icon: '📈', roles: ['HR'] },
+  { to: '/account', label: 'Account', icon: '⚙️', roles: ['EMPLOYEE', 'HR'] },
 ];
 
 export function Layout() {

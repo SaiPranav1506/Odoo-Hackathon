@@ -10,6 +10,7 @@ export function SignUp() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [devLink, setDevLink] = useState('');
   const [busy, setBusy] = useState(false);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -23,7 +24,7 @@ export function SignUp() {
     try {
       const res = await authApi.signup(form);
       setSuccess(res.message ?? 'Account created. Check your email to verify.');
-      setTimeout(() => navigate('/login'), 1600);
+      setDevLink(res.verificationLink ?? '');
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -41,7 +42,18 @@ export function SignUp() {
         </div>
         <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
-          {success && <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">{success}</div>}
+          {success && (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+              <p>{success}</p>
+              {devLink && (
+                <p className="mt-2">
+                  <span className="text-xs font-semibold uppercase text-green-600">Development mode</span>
+                  <a href={devLink} target="_blank" rel="noreferrer"
+                    className="mt-1 block break-all font-medium text-indigo-700 underline hover:text-indigo-900">Verify your email →</a>
+                </p>
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Employee ID</label>

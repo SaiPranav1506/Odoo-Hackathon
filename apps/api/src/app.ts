@@ -3,8 +3,9 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { generalLimiter } from './middleware/rateLimit';
 import { notFoundHandler, errorHandler } from './middleware/error';
-import { env } from './config/env';
+import { env, isDev } from './config/env';
 import { storageRoot } from './lib/storage';
+import { AppError } from './utils/apiError';
 import { authRouter } from './modules/auth/router';
 import { employeesRouter } from './modules/employees/router';
 import { attendanceRouter } from './modules/attendance/router';
@@ -25,8 +26,14 @@ export function createApp(): Express {
   app.use(
     cors({
       origin(origin, cb) {
-        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-        cb(new Error(`CORS origin not allowed: ${origin}`));
+        // Non-browser clients (curl, server-to-server) have no Origin header.
+        if (!origin) return cb(null, true);
+        // In development, accept any localhost origin (any port/preview tool) so a
+        // changed port or 127.0.0.1 never silently breaks the UI.
+        if (isDev && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return cb(null, true);
+        if (allowedOrigins.includes(origin)) return cb(null, true);
+        // Reject with a clear 403 rather than a confusing 500.
+        cb(new AppError(403, `CORS origin not allowed: ${origin}`));
       },
       credentials: true,
     }),

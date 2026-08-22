@@ -27,6 +27,16 @@ const loginSchema = z.object({
 const refreshSchema = z.object({ refreshToken: z.string().min(1) });
 const verifySchema = z.object({ token: z.string().min(1) });
 
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(128),
+  newPassword: z.string().min(8).max(128),
+});
+const forgotPasswordSchema = z.object({ email: z.string().email().max(254) });
+const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  newPassword: z.string().min(8).max(128),
+});
+
 export const authRouter = Router();
 
 async function signup(req: Request, res: Response, next: NextFunction) {
@@ -98,3 +108,28 @@ authRouter.get('/auth/verify-email', validate({ query: verifySchema }), verifyEm
 authRouter.post('/auth/resend-verification', requireAuth, resend);
 authRouter.post('/auth/logout', requireAuth, logout);
 authRouter.get('/auth/me', requireAuth, me);
+
+// Password self-service.
+authRouter.post('/auth/change-password', requireAuth, authLimiter, validate({ body: changePasswordSchema }), async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
+    res.json(await service.changePassword(getAuth(req).userId, currentPassword, newPassword));
+  } catch (e) {
+    next(e);
+  }
+});
+authRouter.post('/auth/forgot-password', authLimiter, validate({ body: forgotPasswordSchema }), async (req, res, next) => {
+  try {
+    res.json(await service.forgotPassword((req.body as { email: string }).email));
+  } catch (e) {
+    next(e);
+  }
+});
+authRouter.post('/auth/reset-password', authLimiter, validate({ body: resetPasswordSchema }), async (req, res, next) => {
+  try {
+    const { token, newPassword } = req.body as { token: string; newPassword: string };
+    res.json(await service.resetPassword(token, newPassword));
+  } catch (e) {
+    next(e);
+  }
+});

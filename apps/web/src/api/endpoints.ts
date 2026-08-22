@@ -51,6 +51,18 @@ export const authApi = {
   },
   resendVerification: async () => {
     const { data } = await api.post('/auth/resend-verification');
+    return data as { message: string; verificationLink?: string };
+  },
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const { data } = await api.post('/auth/change-password', { currentPassword, newPassword });
+    return data as { message: string };
+  },
+  forgotPassword: async (email: string) => {
+    const { data } = await api.post('/auth/forgot-password', { email });
+    return data as { message: string; resetLink?: string };
+  },
+  resetPassword: async (token: string, newPassword: string) => {
+    const { data } = await api.post('/auth/reset-password', { token, newPassword });
     return data as { message: string };
   },
 };
