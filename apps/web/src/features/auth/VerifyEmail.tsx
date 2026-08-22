@@ -31,13 +31,15 @@ export function VerifyEmail() {
 
 export function VerifyEmailNotice() {
   const [sent, setSent] = useState(false);
+  const [devLink, setDevLink] = useState('');
   const [error, setError] = useState('');
 
   async function resend() {
     setError('');
     try {
-      await authApi.resendVerification();
+      const res = await authApi.resendVerification();
       setSent(true);
+      setDevLink(res.verificationLink ?? '');
     } catch (e) {
       setError(errorMessage(e));
     }
@@ -48,7 +50,15 @@ export function VerifyEmailNotice() {
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
         <h1 className="text-xl font-bold text-slate-900">Verify your email</h1>
         <p className="mt-3 text-sm text-slate-600">We sent an activation link to your inbox. You won&apos;t be able to use HR features until your account is verified.</p>
-        {sent && <p className="mt-3 text-sm text-green-700">Verification email resent — check your inbox.</p>}
+        {sent && (
+          <div className="mt-3 text-sm text-green-700">
+            <p>Verification email resent.</p>
+            {devLink && (
+              <a href={devLink} target="_blank" rel="noreferrer"
+                className="mt-1 block break-all font-medium text-indigo-700 underline hover:text-indigo-900">Activate your account (development link) →</a>
+            )}
+          </div>
+        )}
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         <button onClick={resend} className="mt-6 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
           Resend verification email

@@ -62,7 +62,7 @@ export async function adminList(query: Record<string, unknown>) {
     items.map(async (s) => {
       const p = await prisma.employeeProfile.findUnique({
         where: { id: s.employeeId },
-        select: { employeeId: true, firstName: true, lastName: true, department: true },
+        select: { userId: true, employeeId: true, firstName: true, lastName: true, department: true },
       });
       return { ...s, employee: p };
     }),
