@@ -5,7 +5,7 @@ import { generalLimiter } from './middleware/rateLimit';
 import { notFoundHandler, errorHandler } from './middleware/error';
 import { env } from './config/env';
 import { storageRoot } from './lib/storage';
-import { registerAuthRoutes } from './modules/auth/router';
+import { authRouter } from './modules/auth/router';
 import { employeesRouter } from './modules/employees/router';
 import { attendanceRouter } from './modules/attendance/router';
 import { leaveRouter } from './modules/leave/router';
@@ -42,7 +42,7 @@ export function createApp(): Express {
 
   // ---- API v1 ----
   const api = express.Router();
-  registerAuthRoutes(api);
+  api.use(authRouter);
   api.use('/employees', employeesRouter);
   api.use('/attendance', attendanceRouter);
   api.use('/leave', leaveRouter);

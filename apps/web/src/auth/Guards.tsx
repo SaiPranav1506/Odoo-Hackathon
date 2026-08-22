@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import type { Role } from '../api/types';
 
@@ -14,15 +13,15 @@ export function FullPageSpinner() {
   );
 }
 
-export function RequireAuth({ children }: { children: ReactNode }) {
+export function RequireAuth() {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) return <FullPageSpinner />;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
-  return <>{children}</>;
+  return <Outlet />;
 }
 
-export function RequireRole({ role, children }: { role: Role | Role[]; children: ReactNode }) {
+export function RequireRole({ role }: { role: Role | Role[] }) {
   const { user, loading } = useAuth();
   if (loading) return <FullPageSpinner />;
   const roles = Array.isArray(role) ? role : [role];
@@ -30,13 +29,13 @@ export function RequireRole({ role, children }: { role: Role | Role[]; children:
   if (!roles.includes(user.role)) {
     return <Navigate to={user.role === 'HR' ? '/admin' : '/'} replace />;
   }
-  return <>{children}</>;
+  return <Outlet />;
 }
 
-export function RequireVerified({ children }: { children: ReactNode }) {
+export function RequireVerified() {
   const { user, loading } = useAuth();
   if (loading) return <FullPageSpinner />;
   if (!user) return <Navigate to="/login" replace />;
   if (!user.emailVerified) return <Navigate to="/verify-email/notice" replace />;
-  return <>{children}</>;
+  return <Outlet />;
 }

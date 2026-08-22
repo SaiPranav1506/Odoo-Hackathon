@@ -1,0 +1,17 @@
+# Optional local PostgreSQL for development (alternative to Supabase).
+# Usage:  docker compose up -d
+# Then set DATABASE_URL=postgresql://dayflow:dayflow@localhost:5432/dayflow?schema=public
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dayflow
+      POSTGRES_PASSWORD: dayflow
+      POSTGRES_DB: dayflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - dayflow_pg:/var/lib/postgresql/data
+
+volumes:
+  dayflow_pg:

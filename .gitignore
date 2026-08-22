@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.local
+.env.*.local
+
+# uploads (local storage dev)
+apps/api/uploads/
+
+# logs
+*.log
+npm-debug.log*
+.DS_Storeapps/api/migrate_err.txt

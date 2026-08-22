@@ -32,7 +32,7 @@ export function createRefreshToken(userId: number): { token: string; hash: strin
 
 export function verifyAccessToken(token: string): AccessTokenPayload | null {
   try {
-    const payload = jwt.verify(token, env.JWT_SECRET) as AccessTokenPayload & { type?: string };
+    const payload = jwt.verify(token, env.JWT_SECRET) as unknown as AccessTokenPayload & { type?: string };
     if (payload.type === 'refresh') return null;
     return { sub: payload.sub, role: payload.role };
   } catch {
